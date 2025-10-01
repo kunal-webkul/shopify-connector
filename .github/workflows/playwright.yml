@@ -101,12 +101,13 @@ jobs:
         run: |
           cd unopim/packages/Webkul/Shopify/tests/e2e-pw
           npm install
-          npx playwright install --with-deps
+          npx playwright install-deps chromium
+          npx playwright install chromium
 
       - name: Run Playwright tests
         run: |
           cd unopim/packages/Webkul/Shopify/tests/e2e-pw
-          npx playwright test
+          npx playwright test --reporter=list
 
       - name: Upload Playwright report
         if: always()
