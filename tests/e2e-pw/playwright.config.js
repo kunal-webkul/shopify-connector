@@ -33,19 +33,18 @@ module.exports = defineConfig({
     screenshot: 'on', // Optional: to capture screenshots on test failure
   },
 
-  /* Configure projects for major browsers */
-  projects: [
-    {
-      name: 'firefox',
-      use: { 
-        ...devices['Desktop Firefox'],
-        headless: true, // Keep the browser open
-      },
+ /* Configure projects for major browsers */
+projects: [
+  {
+    name: 'chromium',
+    use: {
+      ...devices['Desktop Chrome'],
+      headless: true, // run in headless mode (set false if you want UI)
     },
-
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-  ],
+  },
+  // {
+  //   name: 'Mobile Chrome',
+  //   use: { ...devices['Pixel 5'] },
+  // },
+],
 });
