@@ -95,8 +95,7 @@ jobs:
         run: |
           cd unopim/packages/Webkul/Shopify/tests/e2e-pw
           npm install
-          npx playwright install-deps chromium
-          npx playwright install chromium
+          npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
         run: |
