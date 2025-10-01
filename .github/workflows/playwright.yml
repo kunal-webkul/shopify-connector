@@ -95,8 +95,8 @@ jobs:
         run: |
           cd unopim/packages/Webkul/Shopify/tests/e2e-pw
           npm install
-          npx playwright install-deps chromium
-          npx playwright install chromium
+          npx playwright install-deps firefox
+          npx playwright install firefox
 
       - name: Run Playwright tests
         run: |
