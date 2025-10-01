@@ -20,7 +20,11 @@ jobs:
           MYSQL_DATABASE: unopim
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
       - name: Checkout repository
@@ -40,7 +44,7 @@ jobs:
         run: |
           until mysqladmin ping -h 127.0.0.1 -u root -proot --silent; do
             echo "Waiting for MySQL to be ready..."
-            sleep 2
+            sleep 3
           done
 
       - name: Install UnoPIM
@@ -54,9 +58,8 @@ jobs:
           sed -i "s|^DB_DATABASE=.*|DB_DATABASE=unopim|" .env
           sed -i "s|^DB_USERNAME=.*|DB_USERNAME=root|" .env
           sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=root|" .env
-          php artisan unopim:install --skip-env-check --skip-admin-creation
           php artisan key:generate
-          php artisan migrate --force
+          php artisan migrate:fresh --force
 
       - name: Copy Shopify Connector to Unopim
         run: |
@@ -66,21 +69,21 @@ jobs:
       - name: Register Shopify Connector Package
         run: |
           cd unopim
-          sed -i "/Webkul\\\\User\\\\Providers\\\\UserServiceProvider::class,/a \        Webkul\\\\Shopify\\\\Providers\\\\ShopifyServiceProvider::class," config/app.php
-          sed -i '/"psr-4": {/a \        "Webkul\\\\Shopify\\\\": "packages/Webkul/Shopify/src",' composer.json
-          ls -la
-          cat config/app.php
-          cat composer.json
+          if ! grep -q "Webkul\\\\Shopify\\\\Providers\\\\ShopifyServiceProvider::class" config/app.php; then
+            sed -i "/Webkul\\\\User\\\\Providers\\\\UserServiceProvider::class,/a \        Webkul\\\\Shopify\\\\Providers\\\\ShopifyServiceProvider::class," config/app.php
+          fi
+          if ! grep -q "Webkul\\\\Shopify\\\\" composer.json; then
+            sed -i '/"psr-4": {/a \        "Webkul\\\\Shopify\\\\": "packages/Webkul/Shopify/src",' composer.json
+          fi
           composer dump-autoload
-          php artisan shopify-package:install
+          php artisan shopify-package:install || true
           php artisan optimize:clear
 
       - name: Start UnoPim server
         run: |
           cd unopim
-          php artisan migrate:fresh --seed
           php artisan db:seed --class="Webkul\Shopify\Database\Seeders\ShopifySettingConfigurationValuesSeeder"
-          php artisan serve --host=0.0.0.0 --port=8000 &
+          nohup php artisan serve --host=0.0.0.0 --port=8000 > server.log 2>&1 &
 
       - name: Wait for UnoPim to start
         run: |
@@ -95,13 +98,12 @@ jobs:
         run: |
           cd unopim/packages/Webkul/Shopify/tests/e2e-pw
           npm install
-          npx playwright install-deps chromium
-          npx playwright install chromium
+          npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
         run: |
           cd unopim/packages/Webkul/Shopify/tests/e2e-pw
-          npx playwright test --reporter=list
+          npx playwright test --reporter=html
 
       - name: Upload Playwright report
         if: always()
