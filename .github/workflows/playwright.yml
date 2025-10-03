@@ -68,9 +68,6 @@ jobs:
           cd unopim
           sed -i "/Webkul\\\\User\\\\Providers\\\\UserServiceProvider::class,/a \        Webkul\\\\Shopify\\\\Providers\\\\ShopifyServiceProvider::class," config/app.php
           sed -i '/"psr-4": {/a \        "Webkul\\\\Shopify\\\\": "packages/Webkul/Shopify/src",' composer.json
-          ls -la
-          cat config/app.php
-          cat composer.json
           composer dump-autoload
           php artisan shopify-package:install
           php artisan optimize:clear
@@ -100,7 +97,7 @@ jobs:
       - name: Run Playwright tests
         run: |
           cd unopim/packages/Webkul/Shopify/tests/e2e-pw
-          npx playwright test --reporter=list || true
+          npx playwright test --reporter=list,html || true
 
       - name: Upload Playwright report
         if: always()
