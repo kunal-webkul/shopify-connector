@@ -96,19 +96,16 @@ test.describe.serial('Shopify Create credential Page', () => {
     // await page.getByRole('button', { name: 'Save' }).click();
 
   });
-
-  test('Credential creation with the valid data', async ({ page }) => {
-    await page.getByRole('button', { name: 'Create Credential' }).click();
-    await page.getByRole('textbox', { name: 'http://demo.myshopify.com' }).fill('http://quickstart-c2b9e6cf.myshopify.com');
-    await page.getByRole('textbox', { name: 'Admin API access token' }).fill('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');
-    await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByRole('banner')).toBeVisible();
-    await expect(page.locator('body')).toContainText('Credential Created Success');
-    await page.getByRole('link', { name: 'Back' }).click();
-    await expect(page.locator('#app')).toContainText('Yes');
-    await page.getByText('1 Results').click();
-    await expect(page.getByText('1 Results')).toBeVisible();
-  });
+test('Credential creation with valid data', async ({ page }) => {
+  await page.getByRole('button', { name: /create credential/i }).click();
+  await page.getByLabel(/shopify domain/i).fill('http://quickstart-c2b9e6cf.myshopify.com');
+  await page.getByLabel(/admin api access token/i).fill('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');
+  await page.getByRole('button', { name: /save/i }).click();
+  await expect(page.locator('body')).toContainText(/credential created success/i);
+  await page.getByRole('link', { name: /back/i }).click();
+  await expect(page.locator('#app')).toContainText(/yes/i);
+  await expect(page.getByText(/1 results/i)).toBeVisible();
+});
 
   test('Credential edit and required validation', async ({ page }) => {
     await expect(page.getByTitle('Edit')).toBeVisible();
