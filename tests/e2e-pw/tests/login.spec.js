@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { login } from '../helpers/login';
 
 test.use({
-    browserName: 'firefox',
+    browserName: 'chromium',
     storageState: 'storage/auth.json', // Load session state
 });
 
